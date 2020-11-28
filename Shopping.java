@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Shopping {
   public static void main(String[] args) {
     Scanner scan = new Scanner(System.in);
-    List<Goods> stockList = new ArrayList<Goods>();
+    List<AddPrice> stockList = new ArrayList<AddPrice>();
 
     while (true) {
       // メニュー表示
@@ -31,9 +31,12 @@ public class Shopping {
           System.out.print("商品数を設定してください: ");
           int itemNum = scan.nextInt();
           scan.nextLine();
+          System.out.print("価格を設定してください: ");
+          int price = scan.nextInt();
+          scan.nextLine();
 
           // コンストラクタに値をセットする
-          Goods setItems = new Goods(itemName, itemNum);
+          AddPrice setItems = new AddPrice(itemName, itemNum, price);
 
           // Listに値をセットする
           stockList.add(setItems);
@@ -58,27 +61,56 @@ public class Shopping {
         // 購入品の番号と数を取得
         System.out.print("商品ナンバーを選択してください: ");
         int stockNo = scan.nextInt();
+        scan.nextLine();
         System.out.print("購入数を選択してください: ");
         int stockBuy = scan.nextInt();
+        scan.nextLine();
 
-        // 在庫から選択された商品の数を減らして
-        // 番号と一致する配列を上書きする
-        int i = 1;
-        for (Goods stocks : stockList) {
-          if (stockNo == i) {
-            Goods setItems = new Goods(stocks.getItemName(), stocks.getItemNum() - stockBuy);
-            stockList.set((stockNo - 1), setItems);
+        // 商品購入処理
+        for (AddPrice pay : stockList) {
+          // 商品の購入金額を格納する変数
+          final int PAYMENT = stockBuy * pay.getPrice();
+
+          System.out.print("お支払い金額は" + PAYMENT + "です");
+
+          // 購入の確認
+          System.out.print("購入しますか? (y/n)");
+          String payStatus = scan.nextLine();
+          if (payStatus.equals("n")) {
+            System.out.println("購入をキャンセルしました。");
+            break;
           }
-          i++;
+
+          // yを選んだ場合
+          // 金額を入力させる
+          System.out.print("金額を入力してください: ");
+          int setMoney = scan.nextInt();
+          scan.nextLine();
+
+          if (setMoney > PAYMENT) {
+            int change = setMoney - PAYMENT;
+            System.out.println("購入完了しました。お釣りは" + change + "円です。");
+            // 在庫から選択された商品の数を減らして
+            // 番号と一致する配列を上書きする
+            int i = 1;
+            for (AddPrice stocks : stockList) {
+              if (stockNo == i) {
+                AddPrice setItems = new AddPrice(stocks.getItemName(), stocks.getItemNum() - stockBuy,
+                    stocks.getPrice());
+                stockList.set((stockNo - 1), setItems);
+              }
+              i++;
+            }
+            // 更新があれば配列を再度表示する
+            stocks(stockList);
+          } else {
+            System.out.println("購入に失敗しました。");
+          }
         }
 
-        // 更新後の配列を再度表示する
-        stocks(stockList);
-
         System.out.print("続けて商品を購入しますか? (y/n): ");
-        System.out.print(System.in);
-        String nextStatus = scan.nextLine();
-        if (nextStatus.equals("no")) {
+        String buyStatus = scan.nextLine();
+        if (buyStatus.equals("n")) {
           System.out.println("ご利用ありがとうございました。");
           break;
         }
@@ -90,19 +122,20 @@ public class Shopping {
   }
 
   // 在庫一覧を表示するメソッド
-  public static void stocks(List<Goods> stockItems) {
+  public static void stocks(List<AddPrice> stockItems) {
     System.out.println("在庫一覧を表示する");
 
     // 在庫表を表示
-    System.out.println("商品No." + " 在庫数 " + " 商品名 ");
-    System.out.println("---------------------------");
+    System.out.println("商品No." + " 在庫数 " + " 商品名 " + " 価格 ");
+    System.out.println("-------------------------------------");
     // 商品ナンバーのデフォルト値を設定
     int i = 1;
-    for (Goods stocks : stockItems) {
-      System.out.println(i + "        " + stocks.getItemNum() + "      " + stocks.getItemName());
+    for (AddPrice stocks : stockItems) {
+      System.out
+          .println(i + "        " + stocks.getItemNum() + "      " + stocks.getItemName() + "  " + stocks.getPrice());
       // 商品ナンバーをインクリメント
       i++;
     }
-    System.out.println("---------------------------");
+    System.out.println("-------------------------------------");
   }
 }
