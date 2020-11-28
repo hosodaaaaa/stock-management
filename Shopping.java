@@ -1,113 +1,92 @@
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class Shopping {
   public static void main(String[] args) {
     Scanner scan = new Scanner(System.in);
-    Map<Integer, String> stockList = new HashMap<Integer, String>();
+    List<Goods> stockList = new ArrayList<Goods>();
 
-    while (true) {
-      // メニューの表示
-      String[] menus = { "1.商品生産", "2.在庫一覧", "3.商品購入", "9.終了" };
+    while(true) {
+      // メニュー表示
+      String[] menus = {"1.商品を追加する", "2.商品一覧を確認する", "3.商品を購入する", "9.終了"};
       for (String menu : menus) {
         System.out.println(menu);
       }
-
-      // メニュー項目番号を受け取る箱を用意する
       System.out.print("メニューを選択してください: ");
-      int select = scan.nextInt();
+      int selectMenu = scan.nextInt();
       scan.nextLine();
 
-      // 各メニューの分岐処理
-      if (select == 1) {
-        System.out.println("「商品生産」が選択されました");
-        System.out.println();
-
-        int i = 0;
+      // 各メニューの操作
+      if(selectMenu == 1) {
+        int nth = 0;
         while (true) {
-          i++;
-          System.out.println(i + "つ目の商品を生産します");
+          // nth回目の番号を割り振る
+          nth++;
+          System.out.println(nth + "つ目の商品の設定をしてください");
 
-          // Userに在庫情報を追加させる
-          System.out.print("商品名を入力してください: ");
+          // 商品名の設定
+          System.out.print("商品名を設定してください: ");
           String itemName = scan.nextLine();
-          System.out.print("在庫数を入力してください: ");
+          System.out.print("商品数を設定してください: ");
           int itemNum = scan.nextInt();
           scan.nextLine();
 
-          // 入力した値をコンストラクタに渡す
-          Goods good = new Goods(itemName, itemNum);
-          stockList.put(itemNum, itemName);
-          System.out.println();
+          // コンストラクタに値をセットする
+          Goods setItems = new Goods(itemName, itemNum);
 
-          // 2回目以降の入力処理を
-          // させるか否かの判定を取得する
-          System.out.print((i + 1) + "つ目の商品を生産しますか? (y/n): ");
-          String answer = scan.nextLine();
-          if (answer.equals("n")) {
+          // Listに値をセットする
+          stockList.add(setItems);
+
+          // 追加処理を行うか否か
+          // 判定を取得する
+          System.out.print("続けて商品を追加しますか? (y/n): ");
+          String nextStatus = scan.nextLine();
+          if(nextStatus.equals("n")) {
             break;
           }
         }
-      } else if (select == 2) {
-        System.out.println("「在庫一覧」が選択されました");
-        System.out.println();
-        System.out.println("商品No. " + " 在庫 " + " 商品名 ");
-        System.out.println("--------------------------------");
-        int no = 0;
-        for (Map.Entry<Integer, String> stockLists : stockList.entrySet()) {
-          no++;
-          System.out.println(no + "         " + stockLists.getKey() + "     " + stockLists.getValue());
-        }
-        System.out.println("--------------------------------");
+      } else if (selectMenu == 2) {
+        System.out.println("在庫一覧はこちら");
+        // 在庫表の表示
+        stocks(stockList);
+      } else if (selectMenu == 3) {
+        System.out.println("在庫一覧はこちら");
+        // 在庫表の表示
+        stocks(stockList);
 
-      } else if (select == 3) {
-        while (true) {
-          System.out.println("「商品購入」が選択されました");
-          System.out.println();
-          System.out.println("商品No. " + " 在庫 " + " 商品名 ");
-          System.out.println("--------------------------------");
-          int no = 0;
-          for (Map.Entry<Integer, String> stockLists : stockList.entrySet()) {
-            no++;
-            System.out.println(no + "         " + stockLists.getKey() + "     " + stockLists.getValue());
+        // 購入品の番号と数を取得
+        System.out.print("商品ナンバーを選択してください: ");
+        int stockNo = scan.nextInt();
+        System.out.print("購入数を選択してください: ");
+        int stockBuy = scan.nextInt();
+
+        int i = 1;
+        for (Goods stocks : stockList) {
+          if (stockNo == i) {
+            stockList.set(stocks.getItemNum() - stockBuy);
           }
-          System.out.println("--------------------------------");
-
-          // 改行
-          System.out.println();
-
-          // 購入情報を取得する
-          System.out.print("商品No.を入力してください: ");
-          int selectNo = scan.nextInt();
-          scan.nextLine();
-          System.out.print("個数を入力してください: ");
-          int selectNum = scan.nextInt();
-          scan.nextLine();
-
-          // MapをListに変換
-          List<Integer> keys = new ArrayList<Integer>(stockList.keySet());
-          List<String> value = new ArrayList<String>(stockList.values());
-
-          for (int i = 0; i <= keys.size(); i++) {
-            if (selectNo == i) {
-              stockList.remove(keys.get(i - 1));
-
-              stockList.put(keys.get(i - 1) - selectNum, value.get(i - 1));
-              if (keys.get(i - 1) - selectNum < 0) {
-                System.out.println("在庫がありません");
-                break;
-              }
-            }
-          }
+          i++;
         }
 
-      } else if (select == 9) {
-        System.out.println("またご来店ください");
-        break;
+        stocks(stockList);
       }
     }
+  }
+
+  public static void stocks(List<Goods> stockItems) {
+    System.out.println("在庫一覧を表示する");
+
+    // 在庫表を表示
+    System.out.println("商品No." + " 在庫数 " + " 商品名 ");
+    System.out.println("---------------------------");
+    // 商品ナンバーのデフォルト値を設定
+    int i = 1;
+    for (Goods stocks : stockItems) {
+      System.out.println(i + "        " + stocks.getItemNum() + "      " + stocks.getItemName());
+      // 商品ナンバーをインクリメント
+      i++;
+    }
+    System.out.println("---------------------------");
   }
 }
